@@ -76,7 +76,9 @@
 
 typedef int XtGravity;
 
+#ifndef XtRGravity
 #define XtRGravity "Gravity"
+#endif
 #define XtEForget "forget"
 #define XtENorthWest "northwest"
 #define XtENorth "north"

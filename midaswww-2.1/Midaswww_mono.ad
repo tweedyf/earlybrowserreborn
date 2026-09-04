@@ -662,6 +662,10 @@ midaswww*WWWMain.WWW_Home:
 midaswww*WWWMain.WWW_HomeExecuteWhenCreated:	True
 midaswww*WWWMain.helpCallback:	Set Ingot . WWWFileRequest "http://www-midas.slac.stanford.edu:80/midasv21/overview.html"
 midaswww*WWWMain.mainWindowMarginWidth:	2
+! Motif 2.x: XmMainWindow only recognises its command/message windows via
+! the scrolledWindowChildType constraint; without it they are swallowed by the clip window.
+midaswww*WWWMain.WWWHeader.scrolledWindowChildType:	command_window
+midaswww*WWWMain.WWWKey.scrolledWindowChildType:	message_window
 midaswww*WWWMain.midasCreateCallback:	Set Value .^ iconPixmap MidasWWWIcon\nCustom Create WWW .\nFetch WWWSearch .\nCreate Widget . SGMLHyper WWWHyper\nSet Ingot . IncludeList CreateList("IncludeList"\
 )\nSet Ingot . HistoryList CreateList(HistoryList)\nSet Ingot . IsPS 0\nSet Ingot .^ Popup Convert(0,"Int")\nif argc>1 Set ingot . WWW_Home argv[1]\nelse if getenv(WWW_HOME)!="" Set ingot . WWW_Home g\
 etenv(WWW_HOME)\nelse Set ingot . WWW_Home GetAppResource(.^,home)\nSet Confirm Exit . GetAppResource(.^,confirmExit)\nSet ingot . ShowTitle GetAppResource(.^,"ShowTitle")\nSet ingot . ShowURL GetAppR\

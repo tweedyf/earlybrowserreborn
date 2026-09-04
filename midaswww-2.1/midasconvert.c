@@ -45,7 +45,7 @@ static Boolean MidasConversionConverter(display,args,nargs,from,to,converter_dat
     ToOp.Dynamic = FALSE;
     ToOp.Type = args[2].addr;
      
-    printf("Converting %s to %s rtn=%x\n",FromOp.Type,ToOp.Type,ConvertRtn);
+    printf("Converting %s to %s rtn=%p\n",FromOp.Type,ToOp.Type,(void *) ConvertRtn);
     if (!ConvertRtn(&FromOp,&ToOp)) return FALSE;
     
     new = ToOp.Value.P;
@@ -151,7 +151,7 @@ MidasType Type;
 
       XrmValue from, to;
       Widget ActiveWidget = MidasGetActiveWidget();
-      int result;
+      long result = 0;   /* big enough for any XtArgVal-sized result on LP64 */
 
       if (strcmp(Operand->Type,MString) == 0) 
         {
@@ -174,13 +174,12 @@ MidasType Type;
 
       if (ok) 
         { 
-          if (to.size == sizeof(result)) Operand->Value.I = result;
-          else 
-            {
-              short s;
-              memcpy(&s,to.addr,to.size);
-              Operand->Value.I = s;
-            }
+          /* Xt writes exactly to.size bytes; widen to a full operand word */
+          if      (to.size == sizeof(long))  Operand->Value.I = result;
+          else if (to.size == sizeof(int))   { int   i; memcpy(&i,to.addr,sizeof(i)); Operand->Value.I = i; }
+          else if (to.size == sizeof(short)) { short s; memcpy(&s,to.addr,sizeof(s)); Operand->Value.I = s; }
+          else if (to.size == sizeof(char))  { char  c; memcpy(&c,to.addr,sizeof(c)); Operand->Value.I = c; }
+          else                               Operand->Value.I = result;
         }
       else if (to.size>sizeof(result))
         {
@@ -199,7 +198,7 @@ MidasType Type;
       if (strcmp(Type,MString) == 0)
         {
           char *p = XtMalloc(12);
-          sprintf(p,"%d",Operand->Value.I);
+          sprintf(p,"%ld",Operand->Value.I);
 
           if (Operand->Dynamic) XtFree(Operand->Value.P);
           Operand->Value.P = p;
@@ -270,8 +269,8 @@ static Boolean MidasConvertIntString(In,Out)
 MidasOperand *In;
 MidasOperand *Out;
 {
-   char *new = XtMalloc(12);
-   sprintf(new,"%d",In->Value.P);
+   char *new = XtMalloc(24);
+   sprintf(new,"%ld",In->Value.I);
    Out->Value.P = new;
    return TRUE;
 }
@@ -297,6 +296,29 @@ MidasOperand *Out;
   else return FALSE;
 
   return TRUE;
+}
+/* Motif 2.x XmToggleButtonState is an unsigned char: 0 = XmUNSET, 1 = XmSET */
+static Boolean MidasConvertIntChar(In,Out)
+MidasOperand *In;
+MidasOperand *Out;
+{
+   Out->Value.I = (unsigned char) (In->Value.I != 0);
+   return TRUE;
+}
+static Boolean MidasConvertCharInt(In,Out)
+MidasOperand *In;
+MidasOperand *Out;
+{
+   Out->Value.I = (unsigned char) In->Value.I;
+   return TRUE;
+}
+static Boolean MidasConvertStringSet(In,Out)
+MidasOperand *In;
+MidasOperand *Out;
+{
+   if (!MidasConvertStringBoolean(In,Out)) return FALSE;
+   Out->Value.I = (unsigned char) (Out->Value.I != 0);
+   return TRUE;
 }
 static Boolean MidasConvertStringXmString(In,Out)
 MidasOperand *In;
@@ -423,10 +445,10 @@ static Boolean MidasConvertShortInt(In,Out)
 MidasOperand *In;
 MidasOperand *Out;
 {
-   printf("%x\n",In->Value.I);
+   printf("%lx\n",In->Value.I);
    printf("%x\n",In->Value.S);
    Out->Value.I = (int) In->Value.S;
-   printf("%x\n",Out->Value.I);
+   printf("%lx\n",Out->Value.I);
    return TRUE;
 }
 static Boolean MidasConvertStringNumber(In,Out)
@@ -492,6 +514,8 @@ void MidasConvertInit()
     MidasDeclareStringConverter("XmString",   MidasConvertStringXmString); 
     MidasDeclareStringConverter("MenuWidget", MidasConvertStringWidget);
     MidasDeclareStringConverter("Pixmap",     MidasConvertStringIcon);
+    MidasDeclareStringConverter("DynamicPixmap",      MidasConvertStringIcon); /* Motif 2.x iconPixmap */
+    MidasDeclareStringConverter("XmBackgroundPixmap", MidasConvertStringIcon); /* Motif 2.x backgroundPixmap */
     MidasDeclareStringConverter("Cursor",     MidasConvertStringCursor);   
     MidasDeclareStringConverter("Class",      MidasConvertStringClass);
     MidasDeclareStringConverter("Atom",       MidasConvertStringAtom);
@@ -514,6 +538,13 @@ void MidasConvertInit()
     MidasDeclareConverter("Int","Number",     MidasConvertIntNumber);
     MidasDeclareConverter("Float","Number",   MidasConvertFloatNumber);
     MidasDeclareConverter("Int","Float",      MidasConvertIntFloat);
+    /* Motif 2.x: XmNset is an XmToggleButtonState ("Set") rather than a Boolean */
+    MidasDeclareConverter("Boolean","Set",    MidasConvertIntChar);
+    MidasDeclareConverter("Int","Set",        MidasConvertIntChar);
+    MidasDeclareConverter("String","Set",     MidasConvertStringSet);
+    MidasDeclareConverter("Set","Boolean",    MidasConvertCharInt);
+    MidasDeclareConverter("Set","Int",        MidasConvertCharInt);
+    MidasDeclareConverter("Set","String",     MidasConvertBooleanString);
     MidasDeclareConverter("Int","Short",      MidasConvertIntShort);
     MidasDeclareConverter("Int","HorizontalDimension",MidasConvertIntShort);
     MidasDeclareConverter("Int","VerticalDimension"  ,MidasConvertIntShort);

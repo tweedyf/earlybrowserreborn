@@ -33,6 +33,8 @@
 #include <ctype.h>
 #include <X11/Xos.h>		/* #includes the appropriate <string.h> */
 #include "ps.h"
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef BSD4_2
 #define memset(a,b,c) bzero(a,c)

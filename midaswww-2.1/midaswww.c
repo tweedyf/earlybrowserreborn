@@ -17,6 +17,9 @@
 #include "SGMLPlainText.h"
 #include "GhostviewPlus.h"
 #include "ps.h"
+#include <Xm/Text.h>
+#include <pwd.h>
+#include <sys/types.h>
 
 #include <Xm/MessageB.h> 
 #include <X11/Xatom.h>
@@ -502,7 +505,7 @@ WWWNode *parent;
       a->visited  = FALSE;
       a->redirect = NULL;
 
-      a->icon  = NULL;
+      a->icon  = (Pixmap) 0;
       a->picture = NULL;
 
       a->widgets = NULL;
@@ -527,7 +530,7 @@ WWWFile *file;
    if (file->anchor) 
      {
        XrmQuark temp = file->anchor;
-       file->anchor = NULL;      
+       file->anchor = 0;      
        parent = WWWCreateNode(file,NULL);
        file->anchor = temp;
      }
@@ -1680,7 +1683,7 @@ WWWFile *file;
 MessageBlock *mb;
 {
   static struct sockaddr_in server;
-  static XrmQuark prevnode = NULL;
+  static XrmQuark prevnode = 0;
   char *node = XrmQuarkToString(file->node);
   int port = file->port;
   int s = 0; 
@@ -1734,7 +1737,7 @@ MessageBlock *mb;
             }
 
           item = MidasAddItemToList(nodeList,node);
-          cache = (struct _cache *) XtMalloc(hp->h_length + sizeof(int));
+          cache = (struct _cache *) XtMalloc(sizeof(struct _cache) + hp->h_length); /* data field is at a padded offset on LP64 */
           cache->length = hp->h_length; 
           bcopy(hp->h_addr, &cache->data, hp->h_length);
           item->Pointer = (XtPointer) cache; 
@@ -1789,7 +1792,7 @@ MessageBlock *mb;
 #ifndef NO_NBIO
   socket_ioctl(s,FIONBIO,&enable);
 #endif
-  mb->flag = connect(s,&server,sizeof(server));
+  mb->flag = connect(s,(struct sockaddr *) &server,sizeof(server));
   if (mb->flag<0 && (socket_errno == EWOULDBLOCK || socket_errno == EINPROGRESS))
     {
 #ifdef ADDINPUTOK
@@ -2213,8 +2216,8 @@ char *title;
       actual.node     = appResources.wais_gateway_node;
       actual.port     = appResources.wais_gateway_port;
       actual.file = XrmStringToQuark(new); 
-      actual.keyword = NULL;
-      actual.anchor = NULL; 
+      actual.keyword = 0;
+      actual.anchor = 0; 
       actual.method = getMethod;
       
       XtFree(p);
@@ -2236,8 +2239,8 @@ char *title;
       actual.node     = WWWGateway->node;
       actual.port     = WWWGateway->port;
       actual.file = XrmStringToQuark(new); 
-      actual.keyword = NULL;
-      actual.anchor = NULL; 
+      actual.keyword = 0;
+      actual.anchor = 0; 
       actual.method = getMethod;
       
       XtFree(p);
@@ -2403,7 +2406,7 @@ char *title;
   mb.width = 0;
   mb.halffull = 0;
 
-  if (appResources.waiting_time_out < 0) mb.id = NULL; 
+  if (appResources.waiting_time_out < 0) mb.id = 0; 
   else 
     {
       int timeout = first ? 10000 : appResources.waiting_time_out;         
@@ -2677,7 +2680,7 @@ WWWFile *def;
   char *file = XtNewString(infile); 
   char *orig = file;
    
-  result->anchor = NULL; /* NOT inherited from default */
+  result->anchor = 0; /* NOT inherited from default */
   result->method = getMethod;
 
   /* strip leading and trailing space`s */  
@@ -2686,7 +2689,7 @@ WWWFile *def;
   else
     { 
       for (; isspace(*file); ) file++;
-      for (p = file + strlen(file); isspace(*--p); ) *p = '\0'; 
+      for (p = file + strlen(file); p > file && isspace(*--p); ) *p = '\0'; 
     }
 
   node = strstr(file,"/");
@@ -2697,7 +2700,7 @@ WWWFile *def;
       result->protocol = XrmStringToQuark(file);
       if (result->protocol != def->protocol)
         {    
-          result->node = NULL;
+          result->node = 0;
           result->port = 0;
         }  
       file = protocol + 1;
@@ -2773,6 +2776,19 @@ WWWFile *def;
       for (p=node; *p != '\0'; p++) if (isupper(*p)) *p = tolower(*p);  
       result->node = XrmStringToQuark(node);
 
+      /*
+       * In 1993 "file://host/path" meant anonymous FTP to host.  Modern
+       * "file:///path" and "file://localhost/path" mean the local file
+       * system, so treat those two spellings as the "local" protocol.
+       */
+      if (result->protocol == fileProtocol &&
+          (*node == '\0' || strcmp(node,"localhost") == 0))
+        {
+          result->protocol = localProtocol;
+          result->node = 0;
+          result->port = 0;
+        }
+
       if (directory)
         {
           *(directory) = '/';
@@ -2794,7 +2810,7 @@ WWWFile *def;
 static void WWWFreeUnusedColors(id)
 XtIntervalId *id;
 {
-  *id = NULL;
+  *id = 0;
   fastAllocFreeUnusedColors();
 }
 static void WWWGet(ww,node,include,title)
@@ -2803,7 +2819,7 @@ WWWNode *node;
 List *include;
 char *title;
 {
-  static XtIntervalId id = NULL;
+  static XtIntervalId id = 0;
   WWWLink *link;
   Widget new;
 
@@ -2987,13 +3003,13 @@ char *method;
       strcat(buffer,"?");
       strcat(buffer,keyword);
       new->file = XrmStringToQuark(buffer); 
-      new->anchor = NULL;
+      new->anchor = 0;
       XtFree(buffer);
     }
   else
     {
       new->keyword = XrmStringToQuark(keyword); /* bad idea, creates large number of quarks */
-      new->anchor = NULL;
+      new->anchor = 0;
       new->method = Method;
     }
   dest = WWWCreateNodeAndParent(new); 
@@ -3892,7 +3908,7 @@ char *argv[];
   struct hostent *h;
   WWWFile *pfile; 
 
-  strcpy(password,cuserid(NULL));
+  { struct passwd *pw = getpwuid(getuid()); strcpy(password, pw ? pw->pw_name : "nobody"); }
   gethostname(hostname,32);
   h = gethostbyname(hostname);
   strcat(password,"@");
@@ -3925,9 +3941,9 @@ char *argv[];
 
   WWWFileDefault.protocol = localProtocol;
   WWWFileDefault.port   = 0;
-  WWWFileDefault.node   = NULL; 
-  WWWFileDefault.file   = NULL; 
-  WWWFileDefault.anchor = NULL; 
+  WWWFileDefault.node   = 0; 
+  WWWFileDefault.file   = 0; 
+  WWWFileDefault.anchor = 0; 
   WWWFileDefault.method = getMethod; 
 
   pfile = ParseFile("history:",&WWWFileDefault);  

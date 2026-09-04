@@ -1,4 +1,5 @@
 #include <Xm/Label.h>
+#include "midasproto.h"
 #include <Xm/LabelG.h>
 #include <Xm/RowColumn.h>
 #include <Xm/PushB.h>

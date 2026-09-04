@@ -38,6 +38,7 @@
 #include <Mrm/MrmAppl.h>                        /* Motif Toolkit and MRM */
 #include "xgifload.h"  
 #include "midaswww.h"
+#include <time.h>
 
 #define NEXTBYTE (GetChar(data))
 #define READCODE (ReadCode(&context,gifImage)) 
@@ -330,7 +331,7 @@ DataSource *data;
     gifImage->HasColormap  = HasColormap;
     gifImage->BitsPerPixel = BitsPerPixel;
     gifImage->Image = NULL;
-    gifImage->Pixmap = NULL;
+    gifImage->Pixmap = (Pixmap) 0;
     gifImage->Refcount = 0;
 
     ColorMapSize = 1 << BitsPerPixel; 
@@ -865,7 +866,7 @@ char *message;
 
     if (pixmap) return pixmap;
     if (!image) image = GIFToXImage(w,gifImage,message);
-    if (!image) return NULL;
+    if (!image) return (Pixmap) 0;
 
     XtSetArg(arglist[n], XtNdepth,    &theDepth);  n++;
     XtGetValues(w,arglist,n);
@@ -879,7 +880,7 @@ char *message;
       {
 	XFreePixmap(theDisp,pixmap);
   	XSync(XtDisplay(w), False);  /* Force the error */
-	pixmap = NULL;
+	pixmap = (Pixmap) 0;
       }
     oldhandler = XSetErrorHandler(oldhandler);
     if (pixmap)
@@ -924,7 +925,7 @@ GIFImage *gifImage;
     XFreeColors(XtDisplay(w),theCmap,cols,j,0);
   }
   gifImage->Image = NULL;
-  gifImage->Pixmap = NULL;
+  gifImage->Pixmap = (Pixmap) 0;
 }
 void GIFFreeFile(gifImage)
 GIFImage *gifImage; 

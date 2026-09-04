@@ -51,6 +51,7 @@
 		midasshell.h \
 		midaswidget.h \
 		midaswww.h \
+		midasproto.h \
 		midasnet.h \
 		vms_types.h \
 		xgifload.h \
@@ -87,8 +88,6 @@
 		midasloadimage.c \
 		midaswww.c \
 		midasutil.c \
-		setenv.c \
-		getenv.c \
 		xgifload.c \
 		uid2c.c \
 		midasfetchuid.c \
@@ -131,8 +130,6 @@
 		midasloadimage.o \
 		midaswww.o \
 		midasutil.o \
-		setenv.o \
-		getenv.o \
 		xgifload.o \
 		midasfetchuid.o \
                mwhttp.o \

@@ -28,6 +28,7 @@
  */
 
 #include <X11/Intrinsic.h>
+#include "midasproto.h"
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <X11/CoreP.h>

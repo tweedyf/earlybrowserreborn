@@ -1,6 +1,7 @@
 #include <Mrm/MrmAppl.h>                        /* Motif Toolkit and MRM */
 #include "midaslist.h"
 #include "midasoperand.h"
+#include <Xm/List.h>
 
 XmString MidasCharToString();
 

@@ -19,7 +19,7 @@ typedef struct {
   Boolean   Dynamic;
   union {
     XtPointer P;
-    int I;
+    long I;
     float F;
     short S;
     Boolean B;
@@ -40,4 +40,5 @@ typedef struct {
 #define MFloat   "Float"
 #define MWidget  "Widget"
 #define MNumber  "Number"
+#include "midasproto.h"
 #endif

@@ -10,6 +10,8 @@
 #include "midaslist.h"
 #include "midasoperand.h"
 #include "midasshell.h"
+#include <Xm/ToggleB.h>
+#include <Xm/List.h>
 
 XmString MidasCharToString();
 MidasShell *MidasGetShell();
@@ -701,7 +703,7 @@ static void CustomBuildMenu(Header,w,menu)
       int pass, m=0;
       char *p;
       char mnemonic,mnemonics[37];
-      char *parentType;
+      unsigned char parentType;   /* XmNrowColumnType is an unsigned char resource */
       Arg args[10];
       int n = 0;          
       Boolean enableMnemonics; 
@@ -760,7 +762,7 @@ static void CustomBuildMenu(Header,w,menu)
                 {
                   XtSetArg(args[n],XmNlabelString, verbname); n++;
                   if (mnemonic != ' ' && enableMnemonics) 
-                    XtSetArg(args[n],XmNmnemonic, mnemonic); n++;
+                    { XtSetArg(args[n],XmNmnemonic, mnemonic); n++; }
                   child[m] = XmCreateToggleButtonGadget(w,name,args,n);
                   MidasSetupWidget(child[m]);
                   XtAddCallback(child[m++],XmNvalueChangedCallback,
@@ -770,7 +772,7 @@ static void CustomBuildMenu(Header,w,menu)
                 {
                   XtSetArg(args[n],XmNlabelString, verbname); n++;
                   if (mnemonic != ' ' && enableMnemonics) 
-                    XtSetArg(args[n],XmNmnemonic, mnemonic); n++;
+                    { XtSetArg(args[n],XmNmnemonic, mnemonic); n++; }
                   child[m] = XmCreatePushButtonGadget(w,name,args,n);
                   MidasSetupWidget(child[m]);
                   XtAddCallback(child[m++],XmNactivateCallback,
@@ -819,7 +821,7 @@ static void CustomBuildMenu(Header,w,menu)
      
               XtSetArg(args[n],XmNlabelString , menuname ); n++;
               XtSetArg(args[n],XmNsubMenuId   , submenu  ); n++;
-              if (mnemonic != ' ') XtSetArg(args[n],XmNmnemonic, mnemonic); n++;
+              if (mnemonic != ' ') { XtSetArg(args[n],XmNmnemonic, mnemonic); n++; }
               child[m] = XmCreateCascadeButtonGadget(w,name,args,n);
 /*
  *  If the last item in a menu is a HELP menu, force it to be right aligned

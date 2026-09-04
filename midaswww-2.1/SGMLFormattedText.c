@@ -975,7 +975,7 @@ char **pp;
    int maxlen = 80;
    int width;
 
-   if (dp->calc_len) { len = (int) *pp; width = len - dp->last_len; }
+   if (dp->calc_len) { len = (int) (long) *pp; width = len - dp->last_len; }
    else              { p = *pp;         width = p - dp->last_pos;   }
 
    switch (dp->format_type)
@@ -1035,7 +1035,7 @@ char **pp;
                if (dp->copy_type == SGMLSELECT_LINE &&
                    w == (SGMLFormattedTextObject) dp->sw) len++;   /* explicitely add a line */
 
-               *pp = (char *)len;
+               *pp = (char *) (long) len;
              }
            else
              {

@@ -19,6 +19,10 @@
 #include "midaswidget.h"
 #include "midasshell.h"
 #include "Tree.h"
+#include <Xm/ScrollBar.h>
+extern Boolean SGMLHyperGrep();
+#include <Xm/AtomMgr.h>
+#include <X11/Xatom.h>
 
 typedef Widget (*MidasWidgetScanProc)();
 
@@ -319,7 +323,7 @@ Widget parent;
     MidasFile *mfile;
     ListItem *item;
     Cardinal rc;
-    caddr_t version;
+    XtPointer version;
     MrmCode type; 
         
     MidasSuppressXtWarningMessages();
@@ -354,7 +358,7 @@ Widget parent;
     if (rc != MrmSUCCESS || strcmp((char *)version,VERSION))
       { 
         fprintf(stderr,"Version mismatch for uidfile %s\n",name);
-        if (rc == MrmSUCCESS) fprintf(stderr,"Expected %s, found %s\n",VERSION,version);
+        if (rc == MrmSUCCESS) fprintf(stderr,"Expected %s, found %s\n",VERSION,(char *) version);
         fprintf(stderr,"Please see installation instructions\n");
         exit(FAILURE);
       }
@@ -379,7 +383,7 @@ void MidasWidgetBeingDestroyed(w,mw,reason)
 {
     /* remove from hash chain */ 
  
-    int hash = ((int) w) % HASHTABLESIZE;
+    int hash = (int) (((unsigned long) w) % HASHTABLESIZE);
     MidasWidget *loop = HashTable[hash];
   
     if (loop == mw) HashTable[hash] = mw->HashChain;
@@ -400,7 +404,7 @@ Widget w;
  *  This routine returns a pointer to the MidasWidget structure for any widget.
  */ 
 {
-    int hash = ((int) w) % HASHTABLESIZE;
+    int hash = (int) (((unsigned long) w) % HASHTABLESIZE);
     MidasWidget *mw = HashTable[hash];
   
     for ( ; mw != NULL; mw = mw->HashChain)
@@ -1375,7 +1379,7 @@ Widget w;
     MidasOperand Temp;
     Temp.Dynamic = FALSE;
     Temp.Type = MInt;
-    Temp.Value.I = (int) w;
+    Temp.Value.I = (long) w;
     return Temp;
 }
 static MidasOperand MidasIsManaged(w)
@@ -1456,7 +1460,7 @@ Widget w;
     if (*name == '\0') 
       {
         name = XtMalloc(24);
-        sprintf(name,"No Name (%d)",w);
+        sprintf(name,"No Name (%p)",(void *) w);
         Temp.Dynamic = TRUE;
       }
     else Temp.Dynamic = FALSE;
@@ -2053,7 +2057,7 @@ Widget w;
     }
 
 }
-Widget MidasScanWidgetTree(root,path,scnrtn,closure)
+static Widget MidasScanWidgetTreeInternal(root,path,scnrtn,closure)
 Widget root;
 char *path;
 MidasWidgetScanProc scnrtn;
@@ -2071,7 +2075,7 @@ XtPointer closure;
         path += 3;
         for (w = XtParent(w); w != 0; w = XtParent(w)) 
           {
-            Widget result = MidasScanWidgetTree(w,path,scnrtn,closure);
+            Widget result = MidasScanWidgetTreeInternal(w,path,scnrtn,closure);
             if (result != 0) return result;
           }
         return 0;
@@ -2080,14 +2084,14 @@ XtPointer closure;
       {
         path += 1;
         w = XtParent(w);
-        return MidasScanWidgetTree(w,path,scnrtn,closure);
+        return MidasScanWidgetTreeInternal(w,path,scnrtn,closure);
       }
     else if (strncmp("###",path,3) == 0)
       {
          char t,*p;
          Widget result; 
          strncpy(path,"...",3);   
-         result = MidasScanWidgetTree(w,path,scnrtn,closure);
+         result = MidasScanWidgetTreeInternal(w,path,scnrtn,closure);
          strncpy(path,"###",3);
          if (result) return result;
          
@@ -2115,13 +2119,13 @@ XtPointer closure;
             path += 3; 
             for (list = save , n = nsave; n > 0; n-- , list++) 
               { 
-                Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                 if (result != 0) return result;
               }
             path -= 3;
             for (list = save , n = nsave; n > 0; n-- , list++) 
               { 
-                Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                 if (result != 0) return result;
               }
           }
@@ -2133,13 +2137,13 @@ XtPointer closure;
             path += 3; 
             for (list = save , n = nsave; n > 0; n-- , list++) 
               { 
-                Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                 if (result != 0) return result;
               }
             path -= 3;
             for (list = save , n = nsave; n > 0; n-- , list++) 
               { 
-                Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                 if (result != 0) return result;
               }            
           }
@@ -2155,13 +2159,13 @@ XtPointer closure;
              path += 3; 
              for (list = save , n = nsave ; n > 0; n-- , list++) 
                {
-                 Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                 Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                  if (result != 0) return result;
                }  
              path -= 3;
              for (list = save , n = nsave ; n > 0; n-- , list++) 
                {
-                 Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                 Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                  if (result != 0) return result;
                }  
 	   }
@@ -2180,7 +2184,7 @@ XtPointer closure;
 
             for (; n > 0; n-- , list++) 
               { 
-        	Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+        	Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
         	if (result != 0) return result;
               }
            }   
@@ -2191,7 +2195,7 @@ XtPointer closure;
        
             for (list = save , n = nsave; n > 0; n-- , list++) 
               { 
-                Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                 if (result != 0) return result;
               }
           }
@@ -2206,7 +2210,7 @@ XtPointer closure;
 
              for (; n > 0; n-- , list++) 
                {
-                 Widget result = MidasScanWidgetTree(*list,path,scnrtn,closure);
+                 Widget result = MidasScanWidgetTreeInternal(*list,path,scnrtn,closure);
                  if (result != 0) return result;
                }  
  	   }
@@ -2232,19 +2236,19 @@ XtPointer closure;
             if (strcmp(path,"*") == 0) 
               {
                 *p = temp;
-                return MidasScanWidgetTree(w,p,scnrtn,closure);
+                return MidasScanWidgetTreeInternal(w,p,scnrtn,closure);
               }
             else
               {
                 if (strcmp(XtName(w),path) == 0)
                   {
                     *p = temp;
-                    return MidasScanWidgetTree(w,p,scnrtn,closure);
+                    return MidasScanWidgetTreeInternal(w,p,scnrtn,closure);
                   }
                 else if (strcmp(MidasClassName(w),path) == 0)
                   {
                     *p = temp;
-                    return MidasScanWidgetTree(w,p,scnrtn,closure);
+                    return MidasScanWidgetTreeInternal(w,p,scnrtn,closure);
                   }
                 else
                   {
@@ -2298,7 +2302,7 @@ XtPointer closure;
                 else
                   {
                     if (memcmp(to.addr,result,to.size) == 0) 
-                      return MidasScanWidgetTree(w,p,scnrtn,closure);
+                      return MidasScanWidgetTreeInternal(w,p,scnrtn,closure);
                     else return 0;
                   }
                 } 
@@ -2309,6 +2313,20 @@ XtPointer closure;
             return 0;
           }
       }
+}
+Widget MidasScanWidgetTree(root,path,scnrtn,closure)
+Widget root;
+char *path;
+Widget (*scnrtn)();
+XtPointer closure;
+{
+  /* MidasScanWidgetTreeInternal temporarily patches '\0's into the path
+     while it walks it.  Callers frequently pass string literals, which live
+     in read-only memory on modern systems, so scan a private copy. */
+  char *copy = XtNewString(path);
+  Widget result = MidasScanWidgetTreeInternal(root,copy,scnrtn,closure);
+  XtFree(copy);
+  return result;
 }
 Widget MidasTraceWidgetTree(root,path)
 Widget root;

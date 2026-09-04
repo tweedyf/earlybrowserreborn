@@ -283,7 +283,7 @@ MessageBlock *mb;
   static char     *active_msg1;
   static char     *active_msg2;
   static int      active_port   = 0;
-  static XrmQuark active_node   = (XrmQuark)NULL;
+  static XrmQuark active_node   = 0;
   static int      active_socket = 0;
   static char     active_mode   = ' ';
   static char     active_system[5];

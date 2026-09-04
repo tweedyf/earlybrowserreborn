@@ -1,0 +1,10 @@
+# build products
+*.o
+*.uid
+*.uic
+*.adh
+midaswww
+uid2c
+Midaswww_color.ad
+Midaswww_mono.ad
+core

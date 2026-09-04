@@ -73,7 +73,7 @@ static XtResource resources[] = {
     {XtNinsertPosition, XtCInsertPosition, XtRFunction, sizeof(XtOrderProc),
      Offset(insert_position), XtRImmediate, NULL},
 
-    {SGMLNtagList, SGMLCTagList, SGMLRTagList, sizeof(SGMLTagList),
+    {SGMLNtagList, SGMLCTagList, SGMLRTagList, sizeof(SGMLTagList *),
      Offset(tag_list), XtRImmediate, SGMLINHERIT_TAGLIST},
     {SGMLNdefaultClass, SGMLCClass, SGMLRClass, sizeof(WidgetClass),
      Offset(default_class), XtRImmediate, SGMLINHERIT_CLASS},

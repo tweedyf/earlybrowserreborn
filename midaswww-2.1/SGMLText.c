@@ -1868,7 +1868,7 @@ Boolean plaintext;
 
              ci->flag = TRUE;
              tempb = w->sgml_text.begin_select;
-             if (w->sgml_text.end_select != '\0')
+             if (w->sgml_text.end_select != NULL)
                w->sgml_text.begin_select = w->sgml_text.end_select +1;
              else 
                return NULL;

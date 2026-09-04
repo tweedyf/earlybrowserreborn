@@ -29,6 +29,9 @@
 #include <X11/Xproto.h>
 #include <X11/Xos.h>
 #include "GhostviewP.h"
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <ctype.h>
 
 #ifndef XlibSpecificationRelease
@@ -1034,7 +1037,7 @@ Setup(w)
     gvw->ghostview.gs_width = gvw->core.width;
     gvw->ghostview.gs_height = gvw->core.height;
 
-    sprintf(buf, "%d %d %d %d %d %d %g %g %d %d %d %d",
+    sprintf(buf, "%lu %d %d %d %d %d %g %g %d %d %d %d",
 	    bpixmap, gvw->ghostview.orientation,
 	    gvw->ghostview.llx, gvw->ghostview.lly,
 	    gvw->ghostview.urx, gvw->ghostview.ury,
@@ -1159,7 +1162,7 @@ StartInterpreter(w)
 	close(std_out[1]);
 	dup2(std_err[1], 2);
 	close(std_err[1]);
-	sprintf(buf, "%d", XtWindow(w));
+	sprintf(buf, "%lu", XtWindow(w));
 	setenv("GHOSTVIEW", buf, True);
 	setenv("DISPLAY", XDisplayString(XtDisplay(w)), True);
 

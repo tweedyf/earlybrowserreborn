@@ -1,11 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <string.h>
 
 /* convert uid file to ascii file to use in c */
 void converttoc ();
 void getfilename();
 
-main ( argc, agrv)
+int main ( argc, agrv)
 int argc;
 char *agrv[];
 {

@@ -45,6 +45,8 @@
 #include "SGMLInputText.h"
 #include "SGMLListText.h"
 #include "SGMLHyperP.h"
+#include <Xm/ScrollBar.h>
+#include <X11/Xmu/StdSel.h>
 
 #ifndef ABS
 #define ABS(a)           ((a)>=0?(a):-(a))
@@ -2179,7 +2181,6 @@ Widget SGMLHyperLoadFile(widget,fname)
 Widget widget;
 char   *fname;
 {
-//    extern char *sys_errlist[];
     Widget result = NULL;
 
     FILE *f = fopen(fname,"r");
@@ -2191,7 +2192,7 @@ char   *fname;
     else
     {
         char msg[1024];
-        sprintf(msg,"%s: %s",fname,sys_errlist[errno]);
+        sprintf(msg,"%s: %s",fname,strerror(errno));
         XtWarning(msg);
     }
     return result;  
@@ -2354,7 +2355,8 @@ char **pp;
   Boolean supportsEntities;
 
   char *p;
-  int len, matched; 
+  long len;      /* passed through pp as a pointer-sized value: must be pointer sized on LP64 */
+  int matched; 
   char *name = XtName((Widget)w);
 
   Arg arglist[10];
@@ -2366,7 +2368,7 @@ char **pp;
 
   if (w->object.being_destroyed) return;
 
-  if (calc_len) len = (int) *pp;
+  if (calc_len) len = (long) *pp;
   else          p   = *pp;   
  
   if (!strcmp(name,"default")) name = "";
@@ -2452,7 +2454,7 @@ Boolean include_tags;
 
     SGMLHyperWidget w = (SGMLHyperWidget)widget;
     char  *result, *p;
-    int   len = 1;
+    long  len = 1;   /* dump_text passes this through a char ** */
      
     if (w->sgml_hyper.managed)
       {
@@ -3060,7 +3062,7 @@ int type;
 {
    Display *d = XtDisplay((Widget)hw);
    SGMLTextObjectClass childClass = (SGMLTextObjectClass) XtClass(hw->sgml_hyper.managed);
-   int len = 0;
+   long len = 0;   /* the dump_text methods pass this through a char **, so it must be pointer sized */
    char *p;
    SGMLDumpTextInfo dp;
 

@@ -3,6 +3,7 @@
  */
   
 #include <X11/IntrinsicP.h>
+#include "midasproto.h"
 #include <X11/StringDefs.h>
 #include <X11/Xatom.h>
 #include <X11/Xproto.h>

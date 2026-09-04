@@ -141,7 +141,7 @@ typedef struct _SGMLTextPart {
     int                 num_popups;
     Position            margin;
 #else  /* HP seems to have problems unless we use this silly contruct */
-#ifdef DEC /* dec - alpha osf */
+#if defined(DEC) || defined(__LP64__) || defined(_LP64) /* dec alpha osf, and any 64-bit LP64 unix */
     int                 num_popups;
     Position            margin;
 #else

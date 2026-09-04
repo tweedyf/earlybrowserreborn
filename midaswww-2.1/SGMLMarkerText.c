@@ -625,7 +625,7 @@ Boolean        map;
         for (; !XtIsWidget(parent) ; parent = XtParent(parent));   
         GIFFreeImage(parent,w->sgml_marker_text.image);
         w->sgml_marker_text.ximage = NULL; 
-        w->sgml_marker_text.pixmap = NULL; 
+        w->sgml_marker_text.pixmap = (Pixmap) 0; 
       }
     cb.reason = SGMLTEXT_MAP;
     cb.event = event;

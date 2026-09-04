@@ -799,7 +799,7 @@ char **pp;
    int len;
    char *t, *nl = NULL;
 
-   if (dp->calc_len) len = (int) *pp;
+   if (dp->calc_len) len = (int) (long) *pp;
    else          p = *pp;
 
    if (dp->sw)
@@ -822,7 +822,7 @@ char **pp;
            if (dp->copy_type == SGMLSELECT_LINE &&
                w == (SGMLPlainTextObject) dp->sw) len++;
 
-           *pp = (char *)len;
+           *pp = (char *) (long) len;
          }
        else
          {

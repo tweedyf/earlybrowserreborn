@@ -267,4 +267,5 @@ extern "C" {
 
 #define SGMLIsText(w)     XtIsSubclass(w,sGMLTextObjectClass)
 
-#endif SGMLTEXT_H
+#include "midasproto.h"
+#endif /* SGMLTEXT_H */

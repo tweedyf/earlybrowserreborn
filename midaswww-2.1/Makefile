@@ -1,8 +1,14 @@
-# Generic makefile - Unix (rs6000) version
+# Makefile - modern Linux (64-bit, Open Motif / libmotif 2.3) version
 #
-            LDLIBS = -lXm -lXt -lXmu -lX11 -lMrm
+# Requires: libmotif-dev (Xm, Mrm, uil), libxt-dev, libxmu-dev, libx11-dev
+#
+            LDLIBS = -lMrm -lXm -lXt -lXmu -lXext -lX11
          LDOPTIONS = 
-            CFLAGS = -O2 $(DEFINES) 
+                CC = gcc
+          PORTFLAGS = -std=gnu89 -Wno-endif-labels -Wno-builtin-declaration-mismatch \
+                      -Werror=implicit-function-declaration -Werror=int-conversion \
+                      -Werror=incompatible-pointer-types -Wno-unused-result
+            CFLAGS = -O2 -g $(PORTFLAGS) $(DEFINES) 
                 RM = rm -f
                UIL = uil
 

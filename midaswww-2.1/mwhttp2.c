@@ -131,7 +131,7 @@ MessageBlock *mb;
     }
   else referer = NULL;
 
-  sprintf(post,"Content-type: application/x-www-form-urlencoded\r\nContent-length: %d\r\n\r\n",strlen(idata));
+  sprintf(post,"Content-type: application/x-www-form-urlencoded\r\nContent-length: %d\r\n\r\n",(int) strlen(idata));
 
   command = XtMalloc(30 + strlen(htrq) + strlen(referer) + strlen(post) + (file->file ? strlen(XrmQuarkToString(file->file)) : 0));
 

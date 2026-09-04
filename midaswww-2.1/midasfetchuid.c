@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <X11/Intrinsic.h>
+#include "midasproto.h"
 
 /* MidasMakeUid (): to make a uid file from the data input of a uic file.
    parameters: filename 

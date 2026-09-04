@@ -1,10 +1,11 @@
 #ifdef VMS
 #include <lnmdef.h>
+#include "midasproto.h"
 #include descrip
 typedef struct dsc$descriptor_s string;
 #endif
 
-MidasLoadImage(name)
+void MidasLoadImage(name)
 char *name;
 /*
     The VAX version of MidasLoadImage looks for a shareable using the SLD

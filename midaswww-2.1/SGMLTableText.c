@@ -268,8 +268,8 @@ Opaque Closure;
          }  
      }  
 
-   for (irow = 0; irow < nrows; irow++) printf("irow = %d height = %d\n",irow,w->sgml_table_text.rowHeight[irow]);
-   for (icol = 0; icol < ncols; icol++) printf("icol = %d width = %d\n", icol,w->sgml_table_text.columnWidth[icol]);
+   for (irow = 0; irow < nrows; irow++) printf("irow = %d height = %lu\n",irow,w->sgml_table_text.rowHeight[irow]);
+   for (icol = 0; icol < ncols; icol++) printf("icol = %d width = %lu\n", icol,w->sgml_table_text.columnWidth[icol]);
    /*
     * Query children one final time, set final size of children
     */  

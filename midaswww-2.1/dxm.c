@@ -1,4 +1,5 @@
 #include <Mrm/MrmAppl.h>                        /* Motif Toolkit and MRM */
+#include "midasproto.h"
 #include <X11/CompositeP.h>     
 
 Cardinal DXmNumChildren(w)

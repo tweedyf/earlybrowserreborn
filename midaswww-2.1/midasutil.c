@@ -98,6 +98,7 @@ MidasOperand *p1,*p2,*p3,*p4,*p5,*p6,*p7,*p8;
   return Temp;
 }
 static void MidasPrintf(format,p1,p2,p3,p4,p5,p6,p7,p8)
+char *format;
 MidasOperand *p1,*p2,*p3,*p4,*p5,*p6,*p7,*p8;
 {
   printf(format,p1->Value.P,p2->Value.P,p3->Value.P,p4->Value.P,p5->Value.P,p6->Value.P,p7->Value.P,p8->Value.P);
