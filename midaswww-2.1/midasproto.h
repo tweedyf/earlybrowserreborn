@@ -212,6 +212,7 @@ void MidasSetCallback();
 void MidasSetCallbackValue();
 void MidasSetCursor();
 void MidasSetIngot();
+void MidasSetNetWmIcon();
 void MidasSetIngotOption();
 void MidasSetIngotP();
 void MidasSetIngotString();

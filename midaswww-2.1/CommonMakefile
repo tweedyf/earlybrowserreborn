@@ -88,6 +88,7 @@
 		midasloadimage.c \
 		midaswww.c \
 		midasutil.c \
+		midasicon.c \
 		xgifload.c \
 		uid2c.c \
 		midasfetchuid.c \
@@ -130,6 +131,7 @@
 		midasloadimage.o \
 		midaswww.o \
 		midasutil.o \
+		midasicon.o \
 		xgifload.o \
 		midasfetchuid.o \
                mwhttp.o \

@@ -124,6 +124,11 @@ Modern toolchain/runtime:
   or CDN-fronted site answers 403.  The HTTP/0.9 path is unchanged and can be
   selected with `-xrm 'midaswww.defaultHTTPProtocol: 0.9'` or in the Options
   dialog.
+- Modern desktops ignore the ICCCM `WM_HINTS` icon bitmap that Midas sets
+  through `XmNiconPixmap`, so the dock showed a generic icon.  `midasicon.c`
+  converts that same bitmap to ARGB at several sizes and publishes it as the
+  EWMH `_NET_WM_ICON` property when a shell is realized.  Being an X11
+  property it works identically under XWayland; no desktop file is needed.
 - `file:///path` and `file://localhost/path` are treated as local files.
   In the original, `file://host/path` always meant anonymous FTP to `host`
   (that form still does for any other host); plain paths and `file:/path`

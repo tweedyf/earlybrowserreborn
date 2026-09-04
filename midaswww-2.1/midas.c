@@ -2451,6 +2451,7 @@ Widget widget;
       {
         MidasShell *ms = MidasGetShell(widget);
         XtRealizeWidget(ms->Widget);
+        MidasSetNetWmIcon(ms->Widget);   /* EWMH icon for modern desktops */
       }
 }
 static void MidasPopdown(widget)
