@@ -465,14 +465,27 @@ Input(client_data, source, id)
     } while(gvw->ghostview.ps_input &&
 	    gvw->ghostview.buffer_bytes_left == 0);
 #endif
-    signal(SIGPIPE, oldsig);
     if (gvw->ghostview.ps_input == NULL &&
 	gvw->ghostview.buffer_bytes_left == 0) {
+	/* Modern ghostscript (10.x) does not interpret what it reads from a
+	   pipe until a couple of kilobytes have arrived or the pipe is
+	   closed, so a page sent on its own just sits in gs's input buffer
+	   and no PAGE message ever comes back.  Push it through with a
+	   block of harmless whitespace. */
+	static const char pad[8192] = { [0 ... 8191] = '\n' };
+	int n = 0;
+	while (n < sizeof(pad)) {
+	    int r = write(gvw->ghostview.interpreter_input, pad + n, sizeof(pad) - n);
+	    if (r > 0) n += r;
+	    else if (r < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) usleep(1000);
+	    else break;
+	}
 	if (gvw->ghostview.interpreter_input_id != None) {
 	    XtRemoveInput(gvw->ghostview.interpreter_input_id);
 	    gvw->ghostview.interpreter_input_id = None;
 	}
     }
+    signal(SIGPIPE, oldsig);
 }
 
 /* Output - receive I/O from ghostscript's stdout and stderr.
@@ -1101,6 +1114,9 @@ StartInterpreter(w)
     if (gvw->ghostview.quiet) argv[argc++] = "-dQUIET";
     argv[argc++] = "-dNOPAUSE";
     argv[argc++] = "-dSAFER"; /* Added by TonyJ!!!! Security fix */
+    /* Modern ghostscript builds default to a file device, not x11; the
+       ghostview protocol only works with the x11 device. */
+    argv[argc++] = "-sDEVICE=x11";
 
     if (gvw->ghostview.preload) {
 	cptr = preload = XtNewString(gvw->ghostview.preload);

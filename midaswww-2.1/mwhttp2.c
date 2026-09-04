@@ -133,11 +133,16 @@ MessageBlock *mb;
 
   sprintf(post,"Content-type: application/x-www-form-urlencoded\r\nContent-length: %d\r\n\r\n",(int) strlen(idata));
 
-  command = XtMalloc(30 + strlen(htrq) + strlen(referer) + strlen(post) + (file->file ? strlen(XrmQuarkToString(file->file)) : 0));
+  command = XtMalloc(60 + strlen(htrq) + (referer ? strlen(referer) : 0) + strlen(post) + strlen(XrmQuarkToString(file->node)) + (file->file ? strlen(XrmQuarkToString(file->file)) : 0));
 
   strcpy(command,"POST ");
   strcat(command,file->file ? XrmQuarkToString(file->file): "/"); 
   strcat(command," HTTP/1.0\r\n");
+  /* Host: is required by every virtual-hosted or CDN-fronted server today */
+  strcat(command,"Host: ");
+  strcat(command,XrmQuarkToString(file->node));
+  if (file->port && file->port != 80) sprintf(command+strlen(command),":%d",file->port);
+  strcat(command,"\r\n");
 
   strcat(command, htrq);
   if (referer) 
@@ -275,11 +280,16 @@ MessageBlock *mb;
     }
   else *referer = '\0';
 
-  command = XtMalloc(20 + strlen(htrq) + strlen(referer) + (file->file ? strlen(XrmQuarkToString(file->file)) : 0));
+  command = XtMalloc(60 + strlen(htrq) + (referer ? strlen(referer) : 0) + strlen(XrmQuarkToString(file->node)) + (file->file ? strlen(XrmQuarkToString(file->file)) : 0));
 
   strcpy(command,"GET ");
   strcat(command,file->file ? XrmQuarkToString(file->file): "/"); 
   strcat(command," HTTP/1.0\r\n");
+  /* Host: is required by every virtual-hosted or CDN-fronted server today */
+  strcat(command,"Host: ");
+  strcat(command,XrmQuarkToString(file->node));
+  if (file->port && file->port != 80) sprintf(command+strlen(command),":%d",file->port);
+  strcat(command,"\r\n");
 
   strcat(command, htrq);
   if (*referer)

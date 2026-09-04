@@ -248,11 +248,18 @@ static XtGeometryResult GeometryManager();
 static XrmName dl_quark;
 static XrmName dlc_quark;
 
+/*
+ * The original table used "!<Btn1Down>" etc.  In Xt the "!" means "exactly
+ * these modifiers and no others", so with NumLock or CapsLock on (Mod2/Lock,
+ * normal on a modern desktop) no click ever matched and links were dead.
+ * Ignore lock modifiers instead; Shift is still reported to the callbacks
+ * through the event so shift-click keeps its meaning.
+ */
 static char defaultTranslations[] = 
-"!<Btn1Down>: selectstart()          \n\
- !<Btn1Motion>: selectextend()       \n\
- !<Btn1Up>: selectend(PRIMARY, CUT_BUFFER0)              \n\
- !Ctrl <Btn3Up>: selectall(PRIMARY, CUT_BUFFER0)         \n\
+"~Ctrl ~Meta <Btn1Down>: selectstart()          \n\
+ ~Ctrl ~Meta <Btn1Motion>: selectextend()       \n\
+ ~Ctrl ~Meta <Btn1Up>: selectend(PRIMARY, CUT_BUFFER0)              \n\
+ Ctrl <Btn3Up>: selectall(PRIMARY, CUT_BUFFER0)         \n\
  <Motion>:cursor()                   ";
 
 static XtActionsRec actionsList[] = {

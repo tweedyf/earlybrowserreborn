@@ -805,6 +805,14 @@ char *ResourceName;
                 if (ptr == 0) ret = XtNewString("");
                 else          ret = MidasStringToChar(ptr);
               }
+            else if (strcmp(R->resource_type,"Set") == 0)
+              {
+                /* Motif 2.x: XmNset is an XmToggleButtonState, which Motif's own
+                   reverse converter renders as a String pointer rather than text.
+                   Scripts treat it as the Boolean it was in Motif 1.2. */
+                unsigned char v = *(((unsigned char *) w) + R->resource_offset);
+                ret = XtNewString(v == XmSET ? "True" : "False");
+              }
             else
               {
                 XrmValue from,to;
@@ -923,7 +931,14 @@ static void midas_command_proc(w,tag,reason)
 void MidasEchoCommand(command)
 char *command;
 {
-    Widget w = MidasFindName("MidasCommand");
+    static int trace = -1;
+    Widget w;
+
+    /* MIDAS_TRACE=1 in the environment echoes every interpreted command to stderr */
+    if (trace < 0) trace = (getenv("MIDAS_TRACE") != NULL);
+    if (trace) fprintf(stderr,"midas> %s\n",command);
+
+    w = MidasFindName("MidasCommand");
     if (w && XtIsRealized(w) && XtIsManaged(w))
       {   
         XmString s = MidasCharToString(command);

@@ -31,6 +31,30 @@ them to the font path for the running server:
 
 Otherwise you get `Cannot convert string "-*-helvetica-..." to type FontStruct`.
 
+Set `MIDAS_TRACE=1` in the environment to echo every interpreted Midas
+command to stderr; it is the quickest way to see what a button does.
+
+## PostScript viewing
+
+MidasWWW's Ghostview widget drives `gs` with the classic ghostview protocol
+(GHOSTVIEW environment variable and window property), which Ghostscript 10
+still supports.  Two things get in the way on a current Ubuntu:
+
+- Ubuntu confines `/usr/bin/gs` with an AppArmor profile that denies it
+  any connection to the X server, so you see `Cannot open X display` in
+  the "Ghostscript Errors" dialog.  The profile has an `include if exists
+  <local/gs>` hook for exactly this.  As root, create
+  `/etc/apparmor.d/local/gs` containing
+
+      include <abstractions/X>
+
+  and reload with `apparmor_parser -r /etc/apparmor.d/gs`.
+- Ghostscript no longer executes what it reads from a pipe until about
+  2 KB have arrived or the pipe closes, so a single page sent on its own
+  never produced a PAGE message.  The widget now pads each transfer with
+  whitespace, and passes `-sDEVICE=x11` explicitly because x11 is no longer
+  the compiled-in default device.
+
 ## What changed for the port
 
 64-bit (LP64) correctness:
@@ -88,6 +112,18 @@ Modern toolchain/runtime:
   into a `char *` instead of an `unsigned char`.
 - The URL parser's trailing-whitespace trim read one byte before an empty
   string.
+- The hyper-text widget's mouse translations used `!<Btn1Down>`, which in
+  Xt means "with no modifiers at all".  With NumLock or CapsLock on (normal
+  on a desktop) links never responded.  They now ignore lock modifiers.
+- Motif 2.x types shell `x`/`y` as `HorizontalPosition`/`VerticalPosition`
+  (converters added; this is what made Clone fail), and the toggle-button
+  `set` value is read back as True/False rather than through Motif's
+  reverse enum converter, which writes a pointer where MidasGetValue
+  expects text (this is what broke Search).
+- HTTP/1.0 requests carry a `Host:` header.  Without it every virtual-hosted
+  or CDN-fronted site answers 403.  The HTTP/0.9 path is unchanged and can be
+  selected with `-xrm 'midaswww.defaultHTTPProtocol: 0.9'` or in the Options
+  dialog.
 - `file:///path` and `file://localhost/path` are treated as local files.
   In the original, `file://host/path` always meant anonymous FTP to `host`
   (that form still does for any other host); plain paths and `file:/path`
@@ -101,8 +137,7 @@ declarations and int/pointer conversions into errors so that this class of
 
 - Only the protocols of 1993: `http` (HTTP/0.9 and 1.0), `gopher`, `ftp`,
   `file`.  No HTTPS, no HTTP/1.1 chunked encoding or virtual hosting.
-- Postscript viewing needs an old-style `gs` with the Ghostview X11
-  extension; the menu is greyed out without it.
+- Postscript viewing needs `gs` with the x11 device and X access; see above.
 - The hard-wired home page and help URLs point at hosts that no longer
   exist.  Pass a URL on the command line or set `WWW_HOME`.
 - `tmpnam` is still used for temporary files (linker warning).

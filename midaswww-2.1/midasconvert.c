@@ -445,10 +445,7 @@ static Boolean MidasConvertShortInt(In,Out)
 MidasOperand *In;
 MidasOperand *Out;
 {
-   printf("%lx\n",In->Value.I);
-   printf("%x\n",In->Value.S);
    Out->Value.I = (int) In->Value.S;
-   printf("%lx\n",Out->Value.I);
    return TRUE;
 }
 static Boolean MidasConvertStringNumber(In,Out)
@@ -550,6 +547,17 @@ void MidasConvertInit()
     MidasDeclareConverter("Int","VerticalDimension"  ,MidasConvertIntShort);
     MidasDeclareConverter("Int","ShellHorizPos"      ,MidasConvertIntShort);
     MidasDeclareConverter("Int","ShellVertPos"       ,MidasConvertIntShort);
+    /* Motif 2.x names for shell/widget positions and some int resources */
+    MidasDeclareConverter("Int","HorizontalPosition"  ,MidasConvertIntShort);
+    MidasDeclareConverter("Int","VerticalPosition"    ,MidasConvertIntShort);
+    MidasDeclareConverter("HorizontalPosition","Int"  ,MidasConvertShortInt);
+    MidasDeclareConverter("VerticalPosition","Int"    ,MidasConvertShortInt);
+    MidasDeclareConverter("HorizontalPosition","Number",MidasConvertShortInt);
+    MidasDeclareConverter("VerticalPosition","Number"  ,MidasConvertShortInt);
+    MidasDeclareConverter("Int","HorizontalInt"       ,MidasConvertIntNumber);
+    MidasDeclareConverter("Int","VerticalInt"         ,MidasConvertIntNumber);
+    MidasDeclareConverter("HorizontalInt","Int"       ,MidasConvertIntNumber);
+    MidasDeclareConverter("VerticalInt","Int"         ,MidasConvertIntNumber);
     MidasDeclareConverter("HorizontalDimension","Int",MidasConvertShortInt);
     MidasDeclareConverter("VerticalDimension","Int"  ,MidasConvertShortInt);
     MidasDeclareConverter("HorizontalDimension","Number",MidasConvertShortInt);
